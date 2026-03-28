@@ -1,0 +1,221 @@
+// ==UserScript==
+// @name         Black Russia Forum Helper
+// @namespace    https://forum.blackrussia.online
+// @version      2.0
+// @description  Быстрые ответы для форума Black Russia
+// @author       Helper
+// @match        https://forum.blackrussia.online/threads/*
+// @match        https://forum.blackrussia.online/index.php?threads/*
+// @grant        none
+// @license      MIT
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    // --------------------------------------------------------------
+    // 🔧 НАСТРОЙКИ — ЗДЕСЬ МОЖНО МЕНЯТЬ ТЕКСТЫ ОТВЕТОВ
+    // --------------------------------------------------------------
+    
+    // ID префиксов (НУЖНО ЗАМЕНИТЬ НА СВОИ! Как найти — см. инструкцию ниже)
+    const PREFIX = {
+        ACCEPT: 8,    // ID префикса "Одобрено"
+        REJECT: 7,    // ID префикса "Отказано"
+        REVIEW: 2     // ID префикса "На рассмотрении"
+    };
+    
+    // Шаблоны ответов
+    const TEMPLATES = [
+        {
+            name: '✅ DM',
+            prefix: PREFIX.ACCEPT,
+            text: `[SIZE=4][COLOR=rgb(255, 0, 0)]Доброго времени суток, уважаемый {{nick}}.[/COLOR][/SIZE]
+
+[COLOR=rgb(209, 213, 216)]Нарушитель будет наказан по пункту правил:[/COLOR]
+
+[COLOR=rgb(255, 0, 0)]2.19. Запрещен DM (DeathMatch)[/COLOR] [COLOR=rgb(209, 213, 216)]— убийство или нанесение урона без веской IC причины[/COLOR] [COLOR=rgb(255, 0, 0)]| Jail 60 минут[/COLOR]
+
+[COLOR=rgb(255, 0, 0)]Примечание:[/COLOR] [COLOR=rgb(209, 213, 216)]разрешен ответный DM в целях защиты, обязательно иметь видео доказательство.[/COLOR]
+
+[COLOR=rgb(51, 204, 51)]Одобрено.[/COLOR]`
+        },
+        {
+            name: '❌ Отказ',
+            prefix: PREFIX.REJECT,
+            text: `[SIZE=4][COLOR=rgb(255, 0, 0)]Доброго времени суток, уважаемый {{nick}}.[/COLOR][/SIZE]
+
+[COLOR=rgb(209, 213, 216)]В жалобе отказано по причине отсутствия доказательств или нарушения формы подачи.[/COLOR]
+
+[COLOR=rgb(255, 0, 0)]Отказано, закрыто.[/COLOR]`
+        },
+        {
+            name: '⏳ На рассмотрении',
+            prefix: PREFIX.REVIEW,
+            text: `[SIZE=4][COLOR=rgb(255, 165, 0)]Доброго времени суток, уважаемый {{nick}}.[/COLOR][/SIZE]
+
+[COLOR=rgb(209, 213, 216)]Ваша жалоба взята на рассмотрение. Ожидайте ответа администрации.[/COLOR]
+
+[COLOR=rgb(255, 165, 0)]Не создавайте копий данной темы.[/COLOR]`
+        },
+        {
+            name: '📋 MG',
+            prefix: PREFIX.ACCEPT,
+            text: `[SIZE=4][COLOR=rgb(255, 0, 0)]Доброго времени суток, уважаемый {{nick}}.[/COLOR][/SIZE]
+
+[COLOR=rgb(209, 213, 216)]Нарушитель будет наказан по пункту правил:[/COLOR]
+
+[COLOR=rgb(255, 0, 0)]2.18. Запрещен MG (MetaGaming)[/COLOR] [COLOR=rgb(209, 213, 216)]— использование ООС информации, которую персонаж не мог получить в IC процессе[/COLOR] [COLOR=rgb(255, 0, 0)]| Mute 30 минут[/COLOR]
+
+[COLOR=rgb(51, 204, 51)]Одобрено.[/COLOR]`
+        },
+        {
+            name: '🚗 NonRP Drive',
+            prefix: PREFIX.ACCEPT,
+            text: `[SIZE=4][COLOR=rgb(255, 0, 0)]Доброго времени суток, уважаемый {{nick}}.[/COLOR][/SIZE]
+
+[COLOR=rgb(209, 213, 216)]Нарушитель будет наказан по пункту правил:[/COLOR]
+
+[COLOR=rgb(255, 0, 0)]2.03. Запрещен NonRP Drive[/COLOR] [COLOR=rgb(209, 213, 216)]— вождение в невозможных для него условиях или неправдоподобной манере[/COLOR] [COLOR=rgb(255, 0, 0)]| Jail 30 минут[/COLOR]
+
+[COLOR=rgb(51, 204, 51)]Одобрено.[/COLOR]`
+        }
+    ];
+
+    // --------------------------------------------------------------
+    // ⚙️ КОД — НИЖЕ НИЧЕГО НЕ ТРОГАТЬ
+    // --------------------------------------------------------------
+    
+    // Получение ника автора темы
+    function getThreadAuthor() {
+        const authorLink = document.querySelector('.username, .messageUserBlock a.username, .memberTooltip');
+        if (authorLink) {
+            return authorLink.textContent.trim();
+        }
+        return 'игрок';
+    }
+    
+    // Смена префикса темы
+    function setPrefix(prefixId) {
+        const select = document.querySelector('select[name="thread_prefix_id"]');
+        if (select && prefixId) {
+            select.value = prefixId;
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+            return true;
+        }
+        return false;
+    }
+    
+    // Вставка текста в редактор
+    function insertToEditor(text) {
+        const nick = getThreadAuthor();
+        const finalText = text.replace(/\{\{nick\}\}/g, nick);
+        
+        const editor = document.querySelector('.fr-view, .redactor_editor, .message-editor-wrapper textarea, .editor');
+        if (editor) {
+            if (editor.tagName === 'TEXTAREA') {
+                editor.value += finalText + '\n\n';
+                editor.dispatchEvent(new Event('input', { bubbles: true }));
+            } else {
+                editor.focus();
+                document.execCommand('insertHTML', false, finalText + '<br><br>');
+            }
+            return true;
+        }
+        return false;
+    }
+    
+    // Обработчик кнопки
+    function handleButton(btnData) {
+        if (btnData.prefix) {
+            setPrefix(btnData.prefix);
+        }
+        if (btnData.text) {
+            insertToEditor(btnData.text);
+        }
+    }
+    
+    // Создание панели кнопок
+    function createPanel() {
+        const panel = document.createElement('div');
+        panel.id = 'br-forum-helper';
+        panel.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #1e1e2f;
+            border-radius: 12px;
+            padding: 12px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            border: 1px solid #ff6600;
+            max-height: 80vh;
+            overflow-y: auto;
+            font-family: Arial, sans-serif;
+        `;
+        
+        const title = document.createElement('div');
+        title.textContent = '📌 BR Helper';
+        title.style.cssText = `
+            color: #ff6600;
+            font-weight: bold;
+            text-align: center;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #333;
+            margin-bottom: 5px;
+            cursor: move;
+        `;
+        panel.appendChild(title);
+        
+        TEMPLATES.forEach(tpl => {
+            const btn = document.createElement('button');
+            btn.textContent = tpl.name;
+            btn.style.cssText = `
+                background: #ff6600;
+                border: none;
+                color: white;
+                padding: 6px 12px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 13px;
+                font-weight: bold;
+                transition: 0.2s;
+                min-width: 130px;
+            `;
+            btn.onmouseover = () => btn.style.background = '#ff5500';
+            btn.onmouseout = () => btn.style.background = '#ff6600';
+            btn.onclick = () => handleButton(tpl);
+            panel.appendChild(btn);
+        });
+        
+        const closeBtn = document.createElement('button');
+        closeBtn.textContent = '✖ Свернуть';
+        closeBtn.style.cssText = `
+            background: #333;
+            border: none;
+            color: #ccc;
+            padding: 4px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            margin-top: 5px;
+        `;
+        closeBtn.onclick = () => {
+            panel.style.display = panel.style.display === 'none' ? 'flex' : 'none';
+            closeBtn.textContent = panel.style.display === 'none' ? '▼ Развернуть' : '✖ Свернуть';
+        };
+        panel.appendChild(closeBtn);
+        
+        document.body.appendChild(panel);
+    }
+    
+    // Запуск скрипта после загрузки страницы
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => setTimeout(createPanel, 1500));
+    } else {
+        setTimeout(createPanel, 1500);
+    }
+    
+})();
