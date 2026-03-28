@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Black Russia Forum Helper | Инструменты для администраторов</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Хедер */
+        .header {
+            background: linear-gradient(135deg, #ff6600, #cc5500);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            color: rgba(255,255,255,0.9);
+            font-size: 14px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(0,0,0,0.3);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        /* Основная сетка */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 900px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Карточки */
+        .card {
+            background: rgba(30, 30, 40, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255, 102, 0, 0.3);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .card h2 {
+            color: #ff6600;
+            margin-bottom: 20px;
+            font-size: 22px;
+            border-left: 4px solid #ff6600;
+            padding-left: 15px;
+        }
+
+        .card h3 {
+            color: #ff884d;
+            margin: 15px 0 10px 0;
+            font-size: 18px;
+        }
+
+        /* Шаблоны ответов */
+        .templates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .template-btn {
+            background: linear-gradient(135deg, #ff6600, #cc5500);
+            border: none;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .template-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,102,0,0.4);
+        }
+
+        .template-preview {
+            background: rgba(0,0,0,0.5);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+            font-size: 13px;
+            max-height: 300px;
+            overflow-y: auto;
+            border-left: 3px solid #ff6600;
+        }
+
+        .template-preview pre {
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+            color: #ccc;
+        }
+
+        /* Инструменты */
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ff884d;
+            font-weight: bold;
+        }
+
+        .input-group input, .input-group textarea, .input-group select {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid #ff6600;
+            border-radius: 10px;
+            color: white;
+            font-size: 14px;
+            font-family: monospace;
+        }
+
+        .input-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .action-btn {
+            background: #ff6600;
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            margin-right: 10px;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+
+        .action-btn:hover {
+            background: #ff5500;
+            transform: translateY(-2px);
+        }
+
+        .action-btn.secondary {
+            background: #333;
+        }
+
+        .action-btn.secondary:hover {
+            background: #444;
+        }
+
+        /* Превью никнейма */
+        .nick-preview {
+            background: rgba(255,102,0,0.2);
+            padding: 10px;
+            border-radius: 10px;
+            margin-top: 10px;
+            font-size: 14px;
+            border: 1px solid rgba(255,102,0,0.3);
+        }
+
+        /* Лог действий */
+        .log-area {
+            background: rgba(0,0,0,0.7);
+            border-radius: 12px;
+            padding: 15px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        .log-entry {
+            padding: 5px;
+            border-bottom: 1px solid #333;
+            color: #ccc;
+        }
+
+        .log-entry.success {
+            color: #4caf50;
+        }
+
+        .log-entry.error {
+            color: #ff4444;
+        }
+
+        .log-entry.info {
+            color: #ff884d;
+        }
+
+        /* Инструкция */
+        .instructions {
+            background: rgba(0,0,0,0.4);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .instructions h3 {
+            color: #ff6600;
+            margin-bottom: 10px;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+            line-height: 1.8;
+        }
+
+        .instructions code {
+            background: rgba(255,102,0,0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        /* Футер */
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            border-top: 1px solid rgba(255,102,0,0.3);
+            font-size: 12px;
+            color: #888;
+        }
+
+        /* Скроллбар */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1a2e;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #ff6600;
+            border-radius: 4px;
+        }
+
+        /* Анимация */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Хедер -->
+        <div class="header">
+            <h1>🔥 Black Russia Forum Helper</h1>
+            <p>Инструменты для быстрой модерации и ответов на жалобы</p>
+            <div class="badge">
+                ⚡ Версия 3.0 | Работает с форумом Black Russia
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <!-- Левая колонка: Шаблоны -->
+            <div class="card">
+                <h2>📋 Готовые шаблоны ответов</h2>
+                <div class="templates-grid" id="templatesGrid">
+                    <!-- Шаблоны будут добавлены через JS -->
+                </div>
+                
+                <div class="template-preview" id="templatePreview">
+                    <strong>📝 Предпросмотр:</strong>
+                    <pre id="previewText">Нажмите на любой шаблон для предпросмотра</pre>
+                </div>
+
+                <div class="nick-preview" id="nickPreview">
+                    <strong>👤 Текущий никнейм (из форума):</strong>
+                    <span id="currentNick">Не определен</span>
+                    <button class="action-btn secondary" id="refreshNickBtn" style="padding: 5px 10px; font-size: 12px; margin-left: 10px;">Обновить</button>
+                </div>
+            </div>
+
+            <!-- Правая колонка: Инструменты -->
+            <div class="card">
+                <h2>⚙️ Инструменты модератора</h2>
+                
+                <div class="input-group">
+                    <label>🎯 ID префикса "Одобрено":</label>
+                    <input type="number" id="prefixAccept" value="8" placeholder="ID префикса">
+                </div>
+                
+                <div class="input-group">
+                    <label>❌ ID префикса "Отказано":</label>
+                    <input type="number" id="prefixReject" value="7" placeholder="ID префикса">
+                </div>
+                
+                <div class="input-group">
+                    <label>⏳ ID префикса "На рассмотрении":</label>
+                    <input type="number" id="prefixReview" value="2" placeholder="ID префикса">
+                </div>
+
+                <div class="input-group">
+                    <label>✏️ Кастомный никнейм (если не определяется автоматически):</label>
+                    <input type="text" id="customNick" placeholder="Введите никнейм игрока">
+                </div>
+
+                <button class="action-btn" id="applyPrefixBtn">🏷️ Применить префикс</button>
+                <button class="action-btn" id="insertCustomBtn">📝 Вставить кастомный текст</button>
+                <button class="action-btn secondary" id="clearLogsBtn">🗑️ Очистить лог</button>
+            </div>
+        </div>
+
+        <!-- Лог действий -->
+        <div class="card">
+            <h2>📜 Журнал действий</h2>
+            <div class="log-area" id="logArea">
+                <div class="log-entry info">🔧 Инструмент готов к работе</div>
+                <div class="log-entry info">💡 Откройте тему на форуме Black Russia для автоматического определения никнейма</div>
+            </div>
+        </div>
+
+        <!-- Инструкция -->
+        <div class="instructions">
+            <h3>📖 Как использовать:</h3>
+            <ol>
+                <li>Откройте <strong>форум Black Russia</strong> в отдельной вкладке (<code>https://forum.blackrussia.online/threads/*</code>)</li>
+                <li>На странице темы/жалобы нажмите <strong>"Ответить"</strong> или <strong>"Редактировать"</strong></li>
+                <li>Вернитесь на эту страницу и нажмите на любой шаблон ответа</li>
+                <li>Инструмент автоматически:</li>
+                <ul>
+                    <li>✅ Подставит никнейм автора темы (если страница форума открыта)</li>
+                    <li>✅ Установит соответствующий префикс (если вы на странице редактирования темы)</li>
+                    <li>✅ Вставит готовый текст в редактор сообщения</li>
+                </ul>
+                <li>Вы также можете использовать кнопки для ручной установки префикса и вставки текста</li>
+            </ol>
+            <p style="margin-top: 15px; color: #ff884d;">
+                ⚠️ <strong>Важно:</strong> Для автоматической работы страница форума должна быть открыта в этой же вкладке браузера.
+                Если форум открыт в другой вкладке, скопируйте никнейм вручную.
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>Black Russia Forum Helper v3.0 | Сделано для упрощения модерации | Данные хранятся локально</p>
+        </div>
+    </div>
+
+    <script>
+        // ========== НАСТРОЙКИ ==========
+        let PREFIX = {
+            ACCEPT: 8,
+            REJECT: 7,
+            REVIEW: 2
+        };
+
+        // Шаблоны ответов
+        const TEMPLATES = [
+            {
+                name: '✅ DM (DeathMatch)',
+                prefix: 'ACCEPT',
+                text: `[CENTER][COLOR=rgb(255,0,0)][SIZE=4][I]Доброго времени суток, уважаемый {{nick}}.[/I][/SIZE][/COLOR][/CENTER]
+
+[CENTER][I]Нарушитель будет наказан по пункту правил:[/I][/CENTER]
+
+[CENTER][COLOR=rgb(255,0,0)]2.19. Запрещен DM (DeathMatch) — убийство или нанесение урона без веской IC причины | Jail 60 минут[/COLOR][/CENTER]
+
+[CENTER][COLOR=rgb(50,205,50)]Одобрено.[/COLOR][/CENTER]`
+            },
+            {
+                name: '❌ Отказ (нет доказательств)',
+                prefix: 'REJECT',
+                text: `[CENTER][COLOR=rgb(255,0,0)][SIZE=4][I]Доброго времени суток, уважаемый {{nick}}.[/I][/SIZE][/COLOR][/CENTER]
+
+[CENTER][I]В жалобе отказано по причине отсутствия доказательств.[/I][/CENTER]
+
+[CENTER][COLOR=rgb(255,0,0)]Отказано, закрыто.[/COLOR][/CENTER]`
+            },
+            {
+                name: '⏳ На рассмотрении',
+                prefix: 'REVIEW',
+                text: `[CENTER][COLOR=rgb(255,165,0)][SIZE=4][I]Доброго времени суток, уважаемый {{nick}}.[/I][/SIZE][/COLOR][/CENTER]
+
+[CENTER][I]Ваша жалоба взята на рассмотрение. Ожидайте ответа администрации.[/I][/CENTER]
+
+[CENTER][COLOR=rgb(255,165,0)]Не создавайте копий данной темы.[/COLOR][/CENTER]`
+            },
+            {
+                name: '📋 MG (MetaGaming)',
+                prefix: 'ACCEPT',
+                text: `[CENTER][COLOR=rgb(255,0,0)][SIZE=4][I]Доброго времени суток, уважаемый {{nick}}.[/I][/SIZE][/COLOR][/CENTER]
+
+[CENTER][I]Нарушитель будет наказан по пункту правил:[/I][/CENTER]
+
+[CENTER][COLOR=rgb(255,0,0)]2.18. Запрещен MG (MetaGaming) — использование ООС информации | Mute 30 минут[/COLOR][/CENTER]
+
+[CENTER][COLOR=rgb(50,205,50)]Одобрено.[/COLOR][/CENTER]`
+            },
+            {
+                name: '🚗 CarRam (наезд)',
+                prefix: 'ACCEPT',
+                text: `[CENTER][COLOR=rgb(255,0,0)][SIZE=4][I]Доброго времени суток, уважаемый {{nick}}.[/I][/SIZE][/COLOR][/CENTER]
+
+[CENTER][I]Нарушитель будет наказан по пункту правил:[/I][/CENTER]
+
+[CENTER][COLOR=rgb(255,0,0)]2.20. Запрещен CarRam — наезд на игрока без IC причины | Jail 45 минут[/COLOR][/CENTER]
+
+[CENTER][COLOR=rgb(50,205,50)]Одобрено.[/COLOR][/CENTER]`
+            },
+            {
+                name: '🔫 NonRP оружие',
+                prefix: 'ACCEPT',
+                text: `[CENTER][COLOR=rgb(255,0,0)][SIZE=4][I]Доброго времени суток, уважаемый {{nick}}.[/I][/SIZE][/COLOR][/CENTER]
+
+[CENTER][I]Нарушитель будет наказан за использование NonRP оружия:[/I][/CENTER]
+
+[CENTER][COLOR=rgb(255,0,0)]2.14. Запрещено использование несоответствующего реалиям оружия | Конфискация[/COLOR][/CENTER]
+
+[CENTER][COLOR=rgb(50,205,50)]Одобрено.[/COLOR][/CENTER]`
+            }
+        ];
+
+        // ========== ФУНКЦИИ ==========
+        
+        // Получение никнейма из форума
+        function getNickFromForum() {
+            try {
+                // Пытаемся найти никнейм автора темы на странице форума
+                const authorSelectors = [
+                    '.username',
+                    '.messageUserBlock a.username',
+                    '.memberTooltip',
+                    '.author .username',
+                    '.messageMeta .username'
+                ];
+                
+                for (let selector of authorSelectors) {
+                    const element = document.querySelector(selector);
+                    if (element && element.textContent.trim()) {
+                        return element.textContent.trim();
+                    }
+                }
+                
+                // Альтернативный способ: ищем в URL
+                const url = window.location.href;
+                const match = url.match(/\/members\/([^\/]+)/);
+                if (match) return decodeURIComponent(match[1]);
+                
+                return null;
+            } catch(e) {
+                return null;
+            }
+        }
+
+        // Установка префикса на форуме
+        function setForumPrefix(prefixId) {
+            try {
+                const select = document.querySelector('select[name="thread_prefix_id"]');
+                if (select && prefixId) {
+                    select.value = prefixId;
+                    select.dispatchEvent(new Event('change', { bubbles: true }));
+                    addLog(`✅ Префикс установлен (ID: ${prefixId})`, 'success');
+                    return true;
+                } else {
+                    addLog(`⚠️ Не найден select[name="thread_prefix_id"] на странице`, 'error');
+                    return false;
+                }
+            } catch(e) {
+                addLog(`❌ Ошибка установки префикса: ${e.message}`, 'error');
+                return false;
+            }
+        }
+
+        // Вставка текста в редактор форума
+        function insertTextToForum(text) {
+            try {
+                const editors = [
+                    '.fr-view',
+                    '.redactor_editor',
+                    'textarea.editor',
+                    '.message-editor-wrapper textarea',
+                    '.editor-container textarea',
+                    '#message-editor'
+                ];
+                
+                let editor = null;
+                for (let selector of editors) {
+                    editor = document.querySelector(selector);
+                    if (editor) break;
+                }
+                
+                if (editor) {
+                    if (editor.tagName === 'TEXTAREA') {
+                        const currentValue = editor.value;
+                        editor.value = currentValue + (currentValue ? '\n\n' : '') + text + '\n\n';
+                        editor.dispatchEvent(new Event('input', { bubbles: true }));
+                        editor.dispatchEvent(new Event('change', { bubbles: true }));
+                        addLog(`✅ Текст вставлен в редактор (${editor.tagName})`, 'success');
+                        return true;
+                    } else if (editor.isContentEditable || editor.classList.contains('fr-view')) {
+                        editor.focus();
+                        document.execCommand('insertHTML', false, text + '<br><br>');
+                        addLog(`✅ Текст вставлен в WYSIWYG редактор`, 'success');
+                        return true;
+                    }
+                }
+                
+                addLog(`⚠️ Редактор сообщения не найден. Откройте форму ответа на форуме.`, 'error');
+                return false;
+            } catch(e) {
+                addLog(`❌ Ошибка вставки текста: ${e.message}`, 'error');
+                return false;
+            }
+        }
+
+        // Применение шаблона
+        function applyTemplate(template) {
+            let nick = document.getElementById('customNick').value.trim();
+            if (!nick) {
+                nick = getNickFromForum();
+                if (nick) {
+                    document.getElementById('currentNick').textContent = nick;
+                } else {
+                    nick = 'игрок';
+                    document.getElementById('currentNick').textContent = 'Не определен (используется "игрок")';
+                }
+            } else {
+                document.getElementById('currentNick').textContent = nick + ' (кастомный)';
+            }
+            
+            const finalText = template.text.replace(/\{\{nick\}\}/g, nick);
+            
+            // Установка префикса
+            let prefixId = null;
+            if (template.prefix === 'ACCEPT') prefixId = PREFIX.ACCEPT;
+            else if (template.prefix === 'REJECT') prefixId = PREFIX.REJECT;
+            else if (template.prefix === 'REVIEW') prefixId = PREFIX.REVIEW;
+            
+            if (prefixId) {
+                setForumPrefix(prefixId);
+            }
+            
+            // Вставка текста
+            insertTextToForum(finalText);
+         
